@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="emblulol - 分析化学研究者 · 光影捕捉者，在分子与像素间寻找秩序">
+  <title>emblulol · 科学与艺术交汇处</title>
+
+  <!-- Google Fonts: Inter + Space Grotesk -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    /* ============ CSS 变量 / Reset ============ */
+    :root {
+      --bg-deep: #0b0f19;
+      --bg-card: rgba(15, 20, 35, 0.65);
+      --cyan: #00d4ff;
+      --cyan-dim: rgba(0, 212, 255, 0.15);
+      --cyan-glow: 0 0 18px rgba(0, 212, 255, 0.3);
+      --gold: #f5a623;
+      --gold-dim: rgba(245, 166, 35, 0.15);
+      --gold-glow: 0 0 18px rgba(245, 166, 35, 0.3);
+      --text-primary: #e8eaed;
+      --text-secondary: #9aa0b0;
+      --text-muted: #5a6070;
+      --border-subtle: rgba(255, 255, 255, 0.06);
+      --radius: 16px;
+      --radius-sm: 10px;
+      --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-display: 'Space Grotesk', 'Inter', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      scroll-behavior: smooth;
+      scrollbar-width: thin;
+      scrollbar-color: var(--cyan-dim) var(--bg-deep);
+    }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-deep);
+      color: var(--text-primary);
+      line-height: 1.7;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { text-decoration: none; color: inherit; }
+    ul { list-style: none; }
+    img { display: block; max-width: 100%; }
+
+    /* 网格背景纹理 */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 60% 60% at 50% 30%, black 30%, transparent 70%);
+    }
+
+    /* ============ 导航栏 ============ */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      padding: 18px 0;
+      transition: all var(--transition);
+      background: transparent;
+    }
+    .nav.scrolled {
+      background: rgba(11, 15, 25, 0.82);
+      backdrop-filter: blur(18px) saturate(140%);
+      -webkit-backdrop-filter: blur(18px) saturate(140%);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 10px 0;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+    }
+    .nav-inner {
+      max-width: 1200px; margin: 0 auto; padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo {
+      font-family: var(--font-display);
+      font-size: 1.5rem; font-weight: 700;
+      background: linear-gradient(135deg, var(--cyan), var(--gold));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 2px;
+    }
+    .nav-links { display: flex; gap: 32px; align-items: center; }
+    .nav-links a {
+      font-size: 0.92rem; font-weight: 500; color: var(--text-secondary);
+      position: relative; padding: 4px 0; transition: color var(--transition);
+      letter-spacing: 0.5px;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 2px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, var(--cyan), var(--gold));
+      transition: width var(--transition);
+    }
+    .nav-links a:hover,
+    .nav-links a.active { color: #fff; }
+    .nav-links a.active::after,
+    .nav-links a:hover::after { width: 100%; }
+
+    /* 汉堡菜单（移动端） */
+    .hamburger {
+      display: none; flex-direction: column; gap: 5px; cursor: pointer; z-index: 1001;
+      background: none; border: none; padding: 4px;
+    }
+    .hamburger span {
+      width: 24px; height: 2px; background: var(--text-primary); border-radius: 2px;
+      transition: all var(--transition);
+    }
+    .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+    /* ============ Hero ============ */
+    .hero {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      position: relative; z-index: 1; padding: 120px 24px 80px;
+    }
+    .hero::before {
+      content: ''; position: absolute; top: -30%; left: -20%; width: 80vw; height: 80vw;
+      background: radial-gradient(circle, var(--cyan-dim) 0%, transparent 70%);
+      border-radius: 50%; pointer-events: none;
+    }
+    .hero::after {
+      content: ''; position: absolute; bottom: -20%; right: -15%; width: 70vw; height: 70vw;
+      background: radial-gradient(circle, var(--gold-dim) 0%, transparent 70%);
+      border-radius: 50%; pointer-events: none;
+    }
+    .hero-content {
+      text-align: center; position: relative; z-index: 2; max-width: 720px;
+    }
+    .hero-icon {
+      width: 90px; height: 90px; margin: 0 auto 32px;
+      position: relative;
+    }
+    .hero-icon svg { width: 100%; height: 100%; }
+    .hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2.4rem, 6vw, 3.8rem);
+      font-weight: 700; line-height: 1.25;
+      margin-bottom: 16px;
+    }
+    .hero h1 .cyan { color: var(--cyan); }
+    .hero h1 .gold { color: var(--gold); }
+    .hero .subtitle {
+      font-size: 1.15rem; color: var(--text-secondary);
+      margin-bottom: 40px; line-height: 1.7;
+      max-width: 560px; margin-left: auto; margin-right: auto;
+    }
+    .hero-cta { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+    /* ============ 按钮 ============ */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 13px 28px; border-radius: 50px; font-weight: 600;
+      font-size: 0.95rem; cursor: pointer; transition: all var(--transition);
+      border: 1px solid transparent; font-family: var(--font-body);
+      letter-spacing: 0.3px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--cyan), #00a8cc);
+      color: #0b0f19; border-color: transparent;
+      box-shadow: var(--cyan-glow);
+    }
+    .btn-primary:hover {
+      box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+      transform: translateY(-2px);
+    }
+    .btn-outline {
+      background: transparent; color: var(--gold);
+      border-color: var(--gold);
+      box-shadow: var(--gold-glow);
+    }
+    .btn-outline:hover {
+      background: rgba(245, 166, 35, 0.12);
+      box-shadow: 0 0 30px rgba(245, 166, 35, 0.5);
+      transform: translateY(-2px);
+    }
+
+    /* ============ 通用区块 ============ */
+    .section {
+      position: relative; z-index: 1;
+      padding: 100px 24px;
+    }
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+    .section-label {
+      display: inline-block; font-family: var(--font-display);
+      font-size: 0.78rem; font-weight: 600; letter-spacing: 3px;
+      text-transform: uppercase; margin-bottom: 10px;
+      background: linear-gradient(90deg, var(--cyan), var(--gold));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: 700; margin-bottom: 48px;
+      letter-spacing: 1px;
+    }
+    .section-title span { color: var(--cyan); }
+
+    /* ============ 毛玻璃卡片 ============ */
+    .glass {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px) saturate(140%);
+      -webkit-backdrop-filter: blur(16px) saturate(140%);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      position: relative; overflow: hidden;
+    }
+    .glass::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+      pointer-events: none;
+    }
+
+    /* ============ 技能区 ============ */
+    .skills-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+    .skill-category { padding: 36px 32px; }
+    .skill-category h3 {
+      font-family: var(--font-display); font-size: 1.25rem;
+      margin-bottom: 24px; display: flex; align-items: center; gap: 10px;
+    }
+    .skill-category.chem h3 { color: var(--cyan); }
+    .skill-category.photo h3 { color: var(--gold); }
+    .skill-item { margin-bottom: 18px; }
+    .skill-item:last-child { margin-bottom: 0; }
+    .skill-header {
+      display: flex; justify-content: space-between;
+      font-size: 0.9rem; margin-bottom: 6px;
+    }
+    .skill-header .name { color: var(--text-primary); font-weight: 500; }
+    .skill-header .pct { color: var(--text-muted); font-size: 0.82rem; }
+    .skill-bar {
+      height: 6px; border-radius: 3px; background: rgba(255,255,255,0.06);
+      overflow: hidden;
+    }
+    .skill-bar .fill {
+      height: 100%; border-radius: 3px; transition: width 1.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+      width: 0;
+    }
+    .skill-category.chem .fill { background: linear-gradient(90deg, var(--cyan), #00a8cc); }
+    .skill-category.photo .fill { background: linear-gradient(90deg, var(--gold), #e8951a); }
+
+    /* 发光装饰线 */
+    .skill-category.chem { box-shadow: inset 0 0 0 1px rgba(0,212,255,0.1); }
+    .skill-category.photo { box-shadow: inset 0 0 0 1px rgba(245,166,35,0.1); }
+    .skill-category.chem:hover { box-shadow: inset 0 0 0 1px rgba(0,212,255,0.25), var(--cyan-glow); }
+    .skill-category.photo:hover { box-shadow: inset 0 0 0 1px rgba(245,166,35,0.25), var(--gold-glow); }
+
+    .skill-icon-row {
+      display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px;
+    }
+    .skill-icon-row .tag {
+      font-size: 0.78rem; padding: 5px 14px; border-radius: 50px;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle);
+      color: var(--text-secondary); transition: all var(--transition);
+    }
+    .skill-category.chem .tag:hover {
+      border-color: var(--cyan); color: var(--cyan);
+      box-shadow: 0 0 12px rgba(0,212,255,0.2);
+    }
+    .skill-category.photo .tag:hover {
+      border-color: var(--gold); color: var(--gold);
+      box-shadow: 0 0 12px rgba(245,166,35,0.2);
+    }
+
+    /* ============ 作品集 ============ */
+    .portfolio-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+    }
+    .project-card {
+      cursor: pointer; transition: all var(--transition);
+      padding: 0; display: flex; flex-direction: column;
+    }
+    .project-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+    }
+    .project-img {
+      width: 100%; aspect-ratio: 4 / 3;
+      background: linear-gradient(135deg, rgba(0,212,255,0.12), rgba(245,166,35,0.08));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 3rem; position: relative; overflow: hidden;
+    }
+    .project-img::after {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(circle at 30% 40%, rgba(0,212,255,0.15), transparent 60%),
+                  radial-gradient(circle at 70% 60%, rgba(245,166,35,0.1), transparent 60%);
+    }
+    .project-img i { position: relative; z-index: 1; opacity: 0.8; }
+    /* 不同项目颜色倾向 */
+    .project-card:nth-child(1) .project-img { background: linear-gradient(135deg, rgba(0,212,255,0.2), rgba(100,100,255,0.1)); }
+    .project-card:nth-child(2) .project-img { background: linear-gradient(135deg, rgba(245,166,35,0.18), rgba(180,180,180,0.08)); }
+    .project-card:nth-child(3) .project-img { background: linear-gradient(135deg, rgba(0,212,255,0.15), rgba(0,200,150,0.12)); }
+    .project-card:nth-child(4) .project-img { background: linear-gradient(135deg, rgba(245,166,35,0.2), rgba(180,120,60,0.1)); }
+    .project-info { padding: 22px 20px; flex: 1; display: flex; flex-direction: column; }
+    .project-info h4 {
+      font-family: var(--font-display); font-size: 1.08rem;
+      margin-bottom: 8px; font-weight: 600;
+    }
+    .project-info p {
+      font-size: 0.88rem; color: var(--text-secondary);
+      line-height: 1.6; margin-bottom: 14px; flex: 1;
+    }
+    .project-tags {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px;
+    }
+    .project-tags span {
+      font-size: 0.72rem; padding: 3px 10px; border-radius: 50px;
+      background: rgba(0, 212, 255, 0.08);
+      border: 1px solid rgba(0, 212, 255, 0.18);
+      color: var(--cyan); letter-spacing: 0.5px;
+    }
+    .project-card:nth-child(even) .project-tags span {
+      background: rgba(245, 166, 35, 0.08);
+      border-color: rgba(245, 166, 35, 0.18);
+      color: var(--gold);
+    }
+    .project-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.88rem; font-weight: 600;
+      color: var(--cyan); transition: all var(--transition);
+      margin-top: auto;
+    }
+    .project-card:nth-child(even) .project-link { color: var(--gold); }
+    .project-link:hover { gap: 10px; }
+    .project-link i { font-size: 0.75rem; transition: transform var(--transition); }
+    .project-link:hover i { transform: translateX(3px); }
+
+    /* ============ 联系区 ============ */
+    .contact-wrapper {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 32px; align-items: start;
+    }
+    .contact-form { padding: 36px 32px; }
+    .contact-form .form-group { margin-bottom: 20px; }
+    .contact-form label {
+      display: block; font-size: 0.85rem; font-weight: 500;
+      color: var(--text-secondary); margin-bottom: 6px;
+    }
+    .contact-form input,
+    .contact-form textarea {
+      width: 100%; padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm); color: var(--text-primary);
+      font-family: var(--font-body); font-size: 0.92rem;
+      transition: all var(--transition); resize: vertical;
+    }
+    .contact-form input:focus,
+    .contact-form textarea:focus {
+      outline: none;
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.08);
+    }
+    .contact-form textarea { min-height: 120px; }
+    .contact-form .btn { width: 100%; justify-content: center; }
+
+    /* toast 提示 */
+    .toast {
+      position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%) translateY(120px);
+      background: linear-gradient(135deg, var(--cyan), #00a8cc);
+      color: #0b0f19; padding: 14px 28px; border-radius: 50px;
+      font-weight: 600; font-size: 0.92rem;
+      z-index: 9999; opacity: 0; pointer-events: none;
+      transition: all 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+      box-shadow: 0 8px 30px rgba(0, 212, 255, 0.3);
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* 社交图标区 */
+    .social-card { padding: 36px 32px; }
+    .social-card h3 {
+      font-family: var(--font-display); font-size: 1.25rem;
+      margin-bottom: 8px; color: var(--gold);
+    }
+    .social-card p { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 24px; }
+    .social-links { display: flex; flex-wrap: wrap; gap: 14px; }
+    .social-links a {
+      width: 48px; height: 48px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      transition: all var(--transition);
+    }
+    .social-links a:hover {
+      transform: translateY(-3px);
+      border-color: var(--cyan);
+      box-shadow: 0 0 20px rgba(0, 212, 255, 0.25);
+      color: var(--cyan);
+    }
+    .social-links a:nth-child(even):hover {
+      border-color: var(--gold);
+      box-shadow: 0 0 20px rgba(245, 166, 35, 0.25);
+      color: var(--gold);
+    }
+
+    /* ============ 页脚 ============ */
+    .footer {
+      position: relative; z-index: 1;
+      text-align: center; padding: 40px 24px;
+      border-top: 1px solid var(--border-subtle);
+    }
+    .footer p {
+      font-size: 0.85rem; color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .footer a {
+      color: var(--cyan); font-weight: 500; transition: color var(--transition);
+    }
+    .footer a:hover { color: var(--gold); }
+
+    /* ============ 响应式 ============ */
+    @media (max-width: 768px) {
+      .nav-links {
+        position: fixed; top: 0; right: -100%; width: 260px; height: 100vh;
+        flex-direction: column; justify-content: center; gap: 28px;
+        background: rgba(11, 15, 25, 0.95);
+        backdrop-filter: blur(30px);
+        -webkit-backdrop-filter: blur(30px);
+        transition: right var(--transition);
+        border-left: 1px solid var(--border-subtle);
+      }
+      .nav-links.open { right: 0; }
+      .hamburger { display: flex; }
+      .skills-grid { grid-template-columns: 1fr; }
+      .contact-wrapper { grid-template-columns: 1fr; }
+      .portfolio-grid { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 2rem; }
+    }
+
+    @media (max-width: 480px) {
+      .hero-cta { flex-direction: column; align-items: center; }
+      .btn { width: 100%; justify-content: center; }
+      .section { padding: 64px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== 导航栏 ==================== -->
+  <nav class="nav" id="navbar">
+    <div class="nav-inner">
+      <!-- 【可替换】左侧姓名 -->
+      <a href="#hero" class="nav-logo" data-section="hero">emblulol</a>
+      <button class="hamburger" id="hamburger" aria-label="菜单">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <!-- 导航项：点击平滑滚动到对应区块 -->
+        <li><a href="#hero" data-section="hero">首页</a></li>
+        <li><a href="#skills" data-section="skills">技能</a></li>
+        <li><a href="#portfolio" data-section="portfolio">作品集</a></li>
+        <li><a href="#contact" data-section="contact">联系</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ==================== Hero 全屏首屏 ==================== -->
+  <section class="hero" id="hero">
+    <div class="hero-content">
+      <!-- 【可替换】头像/Logo SVG：烧瓶与镜头交叉图标 -->
+      <div class="hero-icon">
+        <svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- 烧瓶（化学） -->
+          <defs>
+            <linearGradient id="chemGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#00d4ff"/>
+              <stop offset="100%" stop-color="#0088aa"/>
+            </linearGradient>
+            <linearGradient id="photoGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#f5a623"/>
+              <stop offset="100%" stop-color="#d4891a"/>
+            </linearGradient>
+          </defs>
+          <!-- 烧瓶轮廓 -->
+          <path d="M38 12 L38 38 L22 68 C20 73 23 80 30 80 L60 80 C67 80 70 73 68 68 L52 38 L52 12"
+                stroke="url(#chemGrad)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- 液体 -->
+          <path d="M30 68 C30 76 38 78 45 78 C52 78 60 76 60 68 L52 50 L38 50 Z"
+                fill="rgba(0,212,255,0.2)" stroke="none"/>
+          <!-- 气泡 -->
+          <circle cx="40" cy="62" r="2.5" fill="#00d4ff" opacity="0.6"/>
+          <circle cx="48" cy="56" r="1.8" fill="#00d4ff" opacity="0.5"/>
+          <circle cx="44" cy="70" r="2" fill="#00d4ff" opacity="0.45"/>
+          <!-- 镜头（摄影）- 简化相机光圈 -->
+          <circle cx="60" cy="25" r="14" stroke="url(#photoGrad)" stroke-width="2.2" fill="none"/>
+          <circle cx="60" cy="25" r="7" stroke="url(#photoGrad)" stroke-width="1.5" fill="none"/>
+          <circle cx="60" cy="25" r="2.5" fill="#f5a623" opacity="0.7"/>
+          <!-- 光圈叶片暗示 -->
+          <line x1="60" y1="11" x2="60" y2="16" stroke="#f5a623" stroke-width="1" opacity="0.5"/>
+          <line x1="60" y1="34" x2="60" y2="39" stroke="#f5a623" stroke-width="1" opacity="0.5"/>
+          <line x1="46" y1="25" x2="51" y2="25" stroke="#f5a623" stroke-width="1" opacity="0.5"/>
+          <line x1="69" y1="25" x2="74" y2="25" stroke="#f5a623" stroke-width="1" opacity="0.5"/>
+        </svg>
+      </div>
+      <!-- 【可替换】主标语 -->
+      <h1>
+        <span class="cyan">分析化学研究者</span>
+        <span style="color:var(--text-secondary);margin:0 8px;">·</span>
+        <span class="gold">光影捕捉者</span>
+      </h1>
+      <!-- 【可替换】一句话个人定位：融合化学与摄影 -->
+      <p class="subtitle">
+        在分子与像素间寻找秩序 —— 以科研的严谨解构世界，以镜头的诗意重构光影
+      </p>
+      <div class="hero-cta">
+        <!-- CTA1：滚动至作品集 -->
+        <a href="#portfolio" class="btn btn-primary" data-scroll="portfolio">
+          <i class="fa-solid fa-camera-retro"></i> 查看摄影作品
+        </a>
+        <!-- CTA2：滚动至技能区（展示化学能力） -->
+        <a href="#skills" class="btn btn-outline" data-scroll="skills">
+          <i class="fa-solid fa-flask"></i> 了解科研背景
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 技能区 ==================== -->
+  <section class="section" id="skills">
+    <div class="section-inner">
+      <span class="section-label">Expertise</span>
+      <h2 class="section-title"><span>技能</span>与专长</h2>
+      <div class="skills-grid">
+        <!-- 化学类技能 -->
+        <div class="skill-category chem glass">
+          <h3><i class="fa-solid fa-atom"></i> 化学科研</h3>
+          <div class="skill-item">
+            <div class="skill-header"><span class="name">色谱/质谱分析</span><span class="pct">90%</span></div>
+            <div class="skill-bar"><div class="fill" data-width="90"></div></div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-header"><span class="name">样品前处理</span><span class="pct">85%</span></div>
+            <div class="skill-bar"><div class="fill" data-width="85"></div></div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-header"><span class="name">数据可视化 (Origin/Python)</span><span class="pct">82%</span></div>
+            <div class="skill-bar"><div class="fill" data-width="82"></div></div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-header"><span class="name">实验室合规 (GLP/ISO)</span><span class="pct">88%</span></div>
+            <div class="skill-bar"><div class="fill" data-width="88"></div></div>
+          </div>
+          <div class="skill-icon-row">
+            <span class="tag">GC-MS</span><span class="tag">HPLC</span><span class="tag">ICP-OES</span>
+          </div>
+        </div>
+
+        <!-- 摄影类技能 -->
+        <div class="skill-category photo glass">
+          <h3><i class="fa-solid fa-camera"></i> 摄影艺术</h3>
+          <div class="skill-item">
+            <div class="skill-header"><span class="name">构图与光影</span><span class="pct">92%</span></div>
+            <div class="skill-bar"><div class="fill" data-width="92"></div></div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-header"><span class="name">Lightroom / PS 后期</span><span class="pct">87%</span></div>
+            <div class="skill-bar"><div class="fill" data-width="87"></div></div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-header"><span class="name">长曝光 / 延时摄影</span><span class="pct">80%</span></div>
+            <div class="skill-bar"><div class="fill" data-width="80"></div></div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-header"><span class="name">微距摄影</span><span class="pct">85%</span></div>
+            <div class="skill-bar"><div class="fill" data-width="85"></div></div>
+          </div>
+          <div class="skill-icon-row">
+            <span class="tag">Sony α7</span><span class="tag">24-70 f/2.8</span><span class="tag">90mm Macro</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 作品集区 ==================== -->
+  <section class="section" id="portfolio">
+    <div class="section-inner">
+      <span class="section-label">Portfolio</span>
+      <h2 class="section-title"><span>作品</span>集</h2>
+      <div class="portfolio-grid">
+
+        <!-- 项目1：显微晶体摄影 -->
+        <!-- 【可替换】data-link 中的 # 替换为实际项目链接 -->
+        <div class="project-card glass" data-link="#" role="link" tabindex="0">
+          <!-- 【可替换】将 i 标签替换为 <img src="你的图片地址" alt="显微晶体摄影"> -->
+          <div class="project-img"><i class="fa-solid fa-droplet" style="color:var(--cyan);"></i></div>
+          <div class="project-info">
+            <h4>显微晶体摄影</h4>
+            <p>利用偏光显微镜捕捉化学结晶过程的瞬时之美，将实验室变为艺术工坊。</p>
+            <div class="project-tags">
+              <span>#微观</span><span>#化学</span><span>#艺术</span>
+            </div>
+            <span class="project-link">查看详情 <i class="fa-solid fa-arrow-right"></i></span>
+          </div>
+        </div>
+
+        <!-- 项目2：城市建筑光影系列 -->
+        <!-- 【可替换】data-link 中的 # 替换为实际项目链接 -->
+        <div class="project-card glass" data-link="#" role="link" tabindex="0">
+          <!-- 【可替换】将 i 标签替换为 <img src="你的图片地址" alt="城市建筑光影"> -->
+          <div class="project-img"><i class="fa-solid fa-building" style="color:var(--gold);"></i></div>
+          <div class="project-info">
+            <h4>城市建筑光影系列</h4>
+            <p>以长曝光和几何构图捕捉都市建筑的秩序与节奏，探索空间的黑白叙事。</p>
+            <div class="project-tags">
+              <span>#城市</span><span>#建筑</span><span>#黑白</span>
+            </div>
+            <span class="project-link">查看详情 <i class="fa-solid fa-arrow-right"></i></span>
+          </div>
+        </div>
+
+        <!-- 项目3：科研数据可视化 -->
+        <!-- 【可替换】data-link 中的 # 替换为实际项目链接 -->
+        <div class="project-card glass" data-link="#" role="link" tabindex="0">
+          <!-- 【可替换】将 i 标签替换为 <img src="你的图片地址" alt="科研数据可视化"> -->
+          <div class="project-img"><i class="fa-solid fa-chart-line" style="color:var(--cyan);"></i></div>
+          <div class="project-info">
+            <h4>科研数据可视化</h4>
+            <p>用 Python (Matplotlib/Plotly) 将复杂分析数据转化为信息丰富的美学图表。</p>
+            <div class="project-tags">
+              <span>#数据</span><span>#可视化</span><span>#Python</span>
+            </div>
+            <span class="project-link">查看详情 <i class="fa-solid fa-arrow-right"></i></span>
+          </div>
+        </div>
+
+        <!-- 项目4：暗房工艺/胶片摄影 -->
+        <!-- 【可替换】data-link 中的 # 替换为实际项目链接 -->
+        <div class="project-card glass" data-link="#" role="link" tabindex="0">
+          <!-- 【可替换】将 i 标签替换为 <img src="你的图片地址" alt="暗房工艺"> -->
+          <div class="project-img"><i class="fa-solid fa-film" style="color:var(--gold);"></i></div>
+          <div class="project-info">
+            <h4>暗房工艺 / 胶片摄影</h4>
+            <p>回归传统暗房冲洗与放大工艺，以手工方式探索影像的物质性与不确定性。</p>
+            <div class="project-tags">
+              <span>#胶片</span><span>#暗房</span><span>#手工</span>
+            </div>
+            <span class="project-link">查看详情 <i class="fa-solid fa-arrow-right"></i></span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 联系区 ==================== -->
+  <section class="section" id="contact">
+    <div class="section-inner">
+      <span class="section-label">Contact</span>
+      <h2 class="section-title">取得<span>联系</span></h2>
+      <div class="contact-wrapper">
+        <!-- 联系表单 -->
+        <form class="contact-form glass" id="contactForm">
+          <div class="form-group">
+            <label for="name">姓名</label>
+            <input type="text" id="name" placeholder="你的名字" required>
+          </div>
+          <div class="form-group">
+            <label for="email">邮箱</label>
+            <input type="email" id="email" placeholder="your@email.com" required>
+          </div>
+          <div class="form-group">
+            <label for="message">消息</label>
+            <textarea id="message" placeholder="写下你想说的话…" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">
+            <i class="fa-solid fa-paper-plane"></i> 发送消息
+          </button>
+        </form>
+
+        <!-- 社交链接 -->
+        <div class="social-card glass">
+          <h3><i class="fa-solid fa-share-nodes"></i> 社交平台</h3>
+          <p>欢迎通过以下平台关注我的科研动态与摄影作品。</p>
+          <div class="social-links">
+            <!-- 【可替换】href="#" 替换为实际社交链接 -->
+            <a href="#" target="_blank" rel="noopener noreferrer" title="GitHub">
+              <i class="fa-brands fa-github"></i>
+            </a>
+            <!-- 【可替换】href="#" 替换为图虫 / 500px 主页链接 -->
+            <a href="#" target="_blank" rel="noopener noreferrer" title="图虫 / 500px">
+              <i class="fa-solid fa-images"></i>
+            </a>
+            <!-- 【可替换】href="#" 替换为微博 / B站 主页链接 -->
+            <a href="#" target="_blank" rel="noopener noreferrer" title="微博 / B站">
+              <i class="fa-brands fa-weibo"></i>
+            </a>
+            <!-- 【可替换】href="#" 替换为邮箱地址 mailto:yyaoyyao42@gmail.com -->
+            <a href="mailto:yyaoyyao42@gmail.com" title="发送邮件">
+              <i class="fa-solid fa-envelope"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 页脚 ==================== -->
+  <footer class="footer">
+    <!-- 【可替换】版权年份与姓名 -->
+    <p>© 2026 emblulol · <span style="background:linear-gradient(90deg,var(--cyan),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">科学与艺术交汇处</span></p>
+    <p><a href="#hero" data-scroll="hero">↑ 回到顶部</a></p>
+  </footer>
+
+  <!-- Toast 提示 -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ==================== JavaScript ==================== -->
+  <script>
+  (function() {
+    // ========== DOM 引用 ==========
+    const navbar = document.getElementById('navbar');
+    const navLinks = document.getElementById('navLinks');
+    const hamburger = document.getElementById('hamburger');
+    const toast = document.getElementById('toast');
+    const contactForm = document.getElementById('contactForm');
+    const skillFills = document.querySelectorAll('.skill-bar .fill');
+    const projectCards = document.querySelectorAll('.project-card');
+
+    // ========== 导航滚动透明变化 ==========
+    let lastScrollY = 0;
+    function onScroll() {
+      const y = window.scrollY;
+      if (y > 50) {
+        navbar.classList.add('scrolled');
+      } else {
+        navbar.classList.remove('scrolled');
+      }
+      lastScrollY = y;
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    // ========== 汉堡菜单（移动端） ==========
+    hamburger.addEventListener('click', function() {
+      this.classList.toggle('open');
+      navLinks.classList.toggle('open');
+    });
+
+    // 点击菜单项后关闭移动端菜单
+    navLinks.querySelectorAll('a').forEach(function(link) {
+      link.addEventListener('click', function() {
+        hamburger.classList.remove('open');
+        navLinks.classList.remove('open');
+      });
+    });
+
+    // ========== 内部锚点平滑滚动（阻止默认跳转） ==========
+    document.querySelectorAll('a[data-scroll]').forEach(function(anchor) {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        var targetId = this.getAttribute('data-scroll');
+        var target = document.getElementById(targetId);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    // 导航 Logo 和页脚"回到顶部"也走平滑滚动
+    document.querySelectorAll('a[href="#hero"]').forEach(function(a) {
+      a.addEventListener('click', function(e) {
+        e.preventDefault();
+        var hero = document.getElementById('hero');
+        if (hero) hero.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+
+    // ========== Intersection Observer：导航高亮 ==========
+    var sections = document.querySelectorAll('section[id]');
+    var navItems = document.querySelectorAll('.nav-links a[data-section]');
+
+    var observerOptions = {
+      root: null,
+      rootMargin: '-80px 0px -60% 0px',
+      threshold: 0
+    };
+
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          var id = entry.target.getAttribute('id');
+          navItems.forEach(function(item) {
+            item.classList.remove('active');
+            if (item.getAttribute('data-section') === id) {
+              item.classList.add('active');
+            }
+          });
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach(function(section) { observer.observe(section); });
+
+    // ========== 技能进度条动画 ==========
+    var skillsObserved = false;
+    var skillsObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting && !skillsObserved) {
+          skillsObserved = true;
+          skillFills.forEach(function(fill) {
+            var w = fill.getAttribute('data-width') || '0';
+            // 触发动画
+            setTimeout(function() { fill.style.width = w + '%'; }, 80);
+          });
+        }
+      });
+    }, { threshold: 0.3 });
+
+    var skillsSection = document.getElementById('skills');
+    if (skillsSection) skillsObserver.observe(skillsSection);
+
+    // ========== 作品集卡片点击 → 新窗口打开 ==========
+    projectCards.forEach(function(card) {
+      card.addEventListener('click', function() {
+        // 【可替换】data-link 属性值替换为实际项目 URL
+        var url = this.getAttribute('data-link') || '#';
+        if (url !== '#') {
+          window.open(url, '_blank', 'noopener,noreferrer');
+        }
+        // 占位链接 # 不做任何操作（避免页面刷新）
+      });
+
+      // 键盘可访问性 (Enter/Space)
+      card.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          this.click();
+        }
+      });
+    });
+
+    // ========== Toast 提示 ==========
+    function showToast(msg, duration) {
+      duration = duration || 2800;
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(toast._timeout);
+      toast._timeout = setTimeout(function() {
+        toast.classList.remove('show');
+      }, duration);
+    }
+
+    // ========== 联系表单提交 ==========
+    contactForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      showToast('✓ 感谢联系！即将打开邮件客户端…');
+
+      // 【可替换】邮箱地址 yyaoyyao42@gmail.com
+      var email = 'yyaoyyao42@gmail.com';
+      var nameVal = document.getElementById('name').value.trim();
+      var msgVal = document.getElementById('message').value.trim();
+      var subject = encodeURIComponent('来自个人主页的联系：' + (nameVal || '访客'));
+      var body = encodeURIComponent(
+        (msgVal || '（无消息内容）') +
+        '\n\n—— 发自个人主页联系表单'
+      );
+
+      // 延迟打开邮件客户端，确保 toast 可见
+      setTimeout(function() {
+        window.location.href = 'mailto:' + email + '?subject=' + subject + '&body=' + body;
+      }, 600);
+    });
+
+    // ========== 初始化：加载时检测滚动位置 ==========
+    onScroll();
+
+    console.log('%c emblulol · 个人主页 %c已就绪 %c⚗️ 📷',
+      'font-size:1.2em;font-weight:bold;color:#00d4ff;',
+      '',
+      'font-size:1.5em;');
+    console.log('%c在分子与像素间寻找秩序', 'color:#f5a623;font-style:italic;');
+  })();
+  </script>
+</body>
+</html>
